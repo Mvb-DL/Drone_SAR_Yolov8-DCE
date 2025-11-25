@@ -1,0 +1,73 @@
+# DCE-YOLOv8s-SAR
+# Lightweight DCE-Variante für Personendetektion (VisDrone + SARD + HERIDAL + NTUT)
+
+nc: 1  # nur 'person'
+
+# Small-Scale (ähnlich YOLOv8s)
+
+scales:
+  m: [0.50, 0.50, 640] # depth_multiple, width_multiple, default_imgsz
+
+# =====================================================
+# BACKBONE (an DCE-Paper angelehnt, für SAR angepasst)
+# =====================================================
+# Stufen:
+# P1/2 :  64 Kanäle
+# P2/4 : 128 Kanäle
+# P3/8 : 128 Kanäle
+# P4/16: 256 Kanäle (Backbone-Maximum)
+
+backbone:
+  # --- P1/2 Stage (64 Channels) ---
+  - [-1, 1, Conv,  [64, 3, 2]]        # 0: P1/2
+  - [-1, 1, DCE,   [64, 2]]           # 1: DCE auf sehr low-level Features
+
+  # --- P2/4 Stage (128 Channels) ---
+  # Conv direkt aus Layer 0 (wie im Paper)
+  - [0,  1, Conv,  [128, 3, 2]]       # 2: P2/4
+  - [-1, 1, DCE,   [128, 2]]          # 3: DCE für Small-Object-Kontext
+  # ERB bekommt Conv-Output (Layer 2), nicht DCE (paper-naher Pfad)
+  - [2,  1, ERB,   [128, 1]]          # 4: leichter ERB-Block
+
+  # --- P3/8 Stage (128 Channels) ---
+  - [-1, 1, SCDown,[128, 3, 2]]       # 5: P3/8, Downsampling, Kanäle bleiben 128
+  - [-1, 2, ERB,   [128, 2]]          # 6: P3-Feature-Refinement (Small-Scale)
+
+  # --- P4/16 Stage (256 Channels) ---
+  - [-1, 1, SCDown,[256, 3, 2]]       # 7: P4/16, hoch auf 256 Kanäle
+  - [-1, 2, ERB,   [256, 2]]          # 8: P4-Feature-Processing
+
+  # --- Spatial Pyramid Pooling ---
+  - [-1, 1, SPPF,  [256, 5]]          # 9: SPPF mit 256 Channels
+
+
+# =====================================================
+# HEAD / NECK (Tiny/Small/Medium: P2, P3, P4)
+# =====================================================
+
+head:
+  # -------- Top-Down: P4 -> P3 -> P2 --------
+  # P4 (Layer 9) -> Upsample -> P3 Head
+  - [-1, 1, nn.Upsample, [None, 2, 'nearest']]   # 10: Upsample P4 -> P3
+  - [[-1, 6], 1, Concat, [1]]                    # 11: concat mit P3-Backbone (Layer 6)
+  - [-1, 2, ERB,  [128, 2]]                      # 12: P3-Head (128 Kanäle)
+
+  # P3-Head (12) -> Upsample -> P2 Head
+  - [-1, 1, nn.Upsample, [None, 2, 'nearest']]   # 13: Upsample P3 -> P2
+  # Für P2 nutzen wir direkt das DCE-Feature aus Layer 3 (paper-Idee: Tiny aus DCE)
+  - [[-1, 3], 1, Concat, [1]]                    # 14: concat mit DCE-P2 (Layer 3)
+  - [-1, 2, ERB,  [128, 2]]                      # 15: P2/Tiny-Head (128 Kanäle)
+
+  # -------- Bottom-Up: P2 -> P3 -> P4 --------
+  # P2 -> Downsample -> zurück zu P3
+  - [-1, 1, Conv, [128, 3, 2]]                   # 16: Downsample Tiny -> Small
+  - [[-1, 12], 1, Concat, [1]]                   # 17: concat mit P3-Head (Layer 12)
+  - [-1, 2, ERB,  [128, 2]]                      # 18: P3/Small-Head (128 Kanäle)
+
+  # P3 -> Downsample -> zurück zu P4
+  - [-1, 1, Conv, [256, 3, 2]]                   # 19: Downsample Small -> Medium
+  - [[-1, 9], 1, Concat, [1]]                    # 20: concat mit P4-Backbone/SPPF (Layer 9)
+  - [-1, 2, ERB,  [256, 2]]                      # 21: P4/Medium-Head (256 Kanäle)
+
+  # -------- Detection Heads --------
+  - [[15, 18, 21], 1, Detect, [nc]]              # 22: Detect auf P2 (Tiny), P3 (Small), P4 (Medium)
