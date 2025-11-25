@@ -1,0 +1,23 @@
+# cfg/sar_hardneg_stage2.yaml
+names:
+  0: person
+
+path:
+
+train:
+  # 1) HARD NEGATIVES – Fokus auf FP-Reduktion
+  - /notebooks/CVSP/data/NTUT4KYOLO/images/train
+  - /notebooks/CVSP/data/NTUT4KYOLO/images/train
+  - /notebooks/CVSP/data/NTUT4KYOLO/images/train
+  - /notebooks/CVSP/data/NTUT4KYOLO/images/train
+
+  # 2) PERSONEN – v.a. SARD + VisDrone stützen, HERIDAL leicht mitziehen
+  - /notebooks/CVSP/data/SARDYOLO/images/train
+  - /notebooks/CVSP/data/VisdroneYOLO/images/train
+  - /notebooks/CVSP/data/VisdroneYOLO/images/train  # VisDrone leicht gepusht
+  - /notebooks/CVSP/data/HERIDALYOLO/images/train    # nur 1x HERIDAL
+
+val:
+  - /notebooks/CVSP/data/HERIDALYOLO/images/val
+  - /notebooks/CVSP/data/SARDYOLO/images/val
+  - /notebooks/CVSP/data/VisdroneYOLO/images/val
