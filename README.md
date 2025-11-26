@@ -121,7 +121,7 @@ A suggested layout (matching the implementation):
 │       ├── visdrone_person.yaml   # Per-dataset eval YAML (VisDrone, person-only)
 │       └── ntut4kyolo.yaml        # Per-dataset eval YAML (NTUT4K)
 ├── src/
-│   ├── dce_modules.py             # DCE, ERB, SCDown modules
+│   ├── dce_modules.py             # DCE, ERB, SCDown modules 
 │   ├── tasks.py                   # Custom Ultralytics tasks with DCE integration
 │   ├── train_stage1_sar_dce.py    # Stage 1 training script
 │   ├── train_stage2_hardneg.py    # Stage 2 hard-negative fine-tuning
@@ -137,7 +137,7 @@ Path names can be adapted as needed; the important parts are the model YAML, dat
 
 Experiments were run with the following key dependencies:
 
-* Python 3.x
+* Python 3.11.4
 * **PyTorch 2.1.1 + CUDA 12.1**
 * **Ultralytics 8.3.231**
 * `opencv-python==4.8.0.76`
@@ -475,3 +475,4 @@ If you use this repository, please cite the underlying DCE-YOLOv8 and SAR detect
   doi     = {10.1016/j.jnlest.2024.100243}
 }
 ```
+
