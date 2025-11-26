@@ -1,5 +1,5 @@
 
-https://github.com/user-attachments/assets/6a795fcb-29bc-4009-8908-3aa7334c21a5
+
 # DCE-YOLOv8m-SAR: Lightweight Multi-Dataset Person Detection for Search and Rescue
 
 This repository contains a **lightweight, YOLOv8-based detector with DCE modules** (Divided Context Extraction) trained for **single-class person detection** across **four SAR-relevant datasets**:
@@ -27,7 +27,7 @@ while remaining **fast and parameter-efficient**.
 
 
 https://github.com/user-attachments/assets/1d7be97a-ce3f-4188-a52e-a829462d7eed
-
+https://github.com/user-attachments/assets/6a795fcb-29bc-4009-8908-3aa7334c21a5
 
 ---
 
@@ -482,5 +482,6 @@ If you use this repository, please cite the underlying DCE-YOLOv8 and SAR detect
   doi     = {10.1016/j.jnlest.2024.100243}
 }
 ```
+
 
 
